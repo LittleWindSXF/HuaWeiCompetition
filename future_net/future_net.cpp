@@ -25,9 +25,9 @@ int main(int argc, char *argv[])
         printf("Please input valid demand file.\n");
         return -1;
     }
-	for(int i=0;i<edge_num;i++)	
-		printf("%s",*(topo+i));
-	printf("\ndemand:%s\n",demand);
+//	for(int i=0;i<edge_num;i++)	
+//		printf("%s",*(topo+i));
+//	printf("\ndemand:%s\n",demand);
     search_route(topo, edge_num, demand);
 
     char *result_file = argv[3];

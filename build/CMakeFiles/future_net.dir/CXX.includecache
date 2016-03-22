@@ -49,6 +49,8 @@ lib_record.h
 /home/littlewindsxf/HuaWei/graphic/SDK-gcc-1.0/future_net/lib_record.h
 stdio.h
 -
+lib_time.h
+/home/littlewindsxf/HuaWei/graphic/SDK-gcc-1.0/future_net/lib_time.h
 
 /home/littlewindsxf/HuaWei/graphic/SDK-gcc-1.0/future_net/route.h
 iostream

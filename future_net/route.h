@@ -62,10 +62,22 @@ public:
 	unsigned short getEdgeIndex(unsigned short toVertexIndex){
 		unsigned short index;
 		for(int i=0;i<edgeNum;i++){
-			if(edges[i].nextVertex->index == toVertexIndex)
+			if(edges[i].nextVertex->index == toVertexIndex){
 				index=edges[i].index;
+				break;
+			}
 		}	
 		return index;
+	}
+	unsigned short getEdgeCost(unsigned short toVertexIndex){
+		unsigned short cost;
+		for(int i=0;i<edgeNum;i++){
+			if(edges[i].nextVertex->index == toVertexIndex){
+				cost=edges[i].cost;
+				break;
+			}	
+		}	
+		return cost;
 	}
 };
 

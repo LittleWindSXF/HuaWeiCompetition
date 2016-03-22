@@ -1,0 +1,4 @@
+#!bin/bash
+
+ ./bin/future_net  ../test-case/case1/topo.csv  ../test-case/case1/demand.csv   ../test-case/case1/sample_result.csv 
+

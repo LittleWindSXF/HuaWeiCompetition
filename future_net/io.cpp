@@ -35,6 +35,14 @@ void record_result(unsigned short edge)
         len += sprintf(g_result + len, "|");
     len += sprintf(g_result + len, "%d", edge);
 }
+unsigned int myTime(){
+	struct timeb rawtime;
+	ftime(&rawtime);
+
+	static unsigned int s = rawtime.time;
+	return (rawtime.time-s);
+}
+
 
 void print_time(const char *head)
 { 

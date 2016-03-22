@@ -2,52 +2,91 @@
 #include "route.h"
 #include "lib_record.h"
 #include <stdio.h>
+#include"lib_time.h"
+
 
 #define MAX 600
 unsigned short g_resultTemp[MAX];
+unsigned short g_result[MAX];
+unsigned long  g_cost;
+unsigned short g_stepNumTemp;
 unsigned short g_stepNum=0;
+bool g_timeUp=false;
 bool g_found=false;
 unsigned short forcePoint[50]={0};
 unsigned short head,tail,FPnum=0,vertNum=0;
+GraphVertex *pVertex[MAX+1]={NULL};
 bool isOK();
-
+void saveResult();
+void compareResult();
 
 
 //你要完成的功能总入口
 void search_route(char *topo[5000], int edge_num, char *demand)
 {
-
+	myTime();
+	//获取起点终点、必须通过的点
 	getCommand(demand,&head,&tail,&FPnum,forcePoint);	
-
-	GraphVertex *pVertex[MAX+1]={NULL};
+	//获取topo，构建图
 	vertNum=getGraphic(topo,edge_num,pVertex);
+	//寻找路径
 	depth_visit(pVertex[head],tail);	
-
-	if(g_found){
-	unsigned short path;
-	unsigned short vIndex,nvIndex;
-    for (int i = 0; i < g_stepNum-1; i++){
-		vIndex=g_resultTemp[i];
-		nvIndex=g_resultTemp[i+1];
-		path=pVertex[vIndex]->getEdgeIndex(nvIndex);
-        record_result(path);
-	}
-	//	printf("\nfound!look:-->");
-	//	for(int i=0;i<g_stepNum;i++)
-	//		printf("%hu-->",g_resultTemp[i]);
-	//	printf("\n");
-	}
-	else
-	;//	printf("\n\nNA\n\n");
+	//保存到文件
+	saveResult();
 }
 
+unsigned long getNewCost(){
+	unsigned long allCost=0;
+		unsigned short vIndex,nvIndex;
+   		 for (int i = 0; i < g_stepNumTemp-1; i++){
+			vIndex=g_resultTemp[i];
+			nvIndex=g_resultTemp[i+1];
+			allCost+=pVertex[vIndex]->getEdgeCost(nvIndex);
+		 }
+	return allCost;
+}
+
+void compareResult(){
+	unsigned long newCost=getNewCost();
+	if(g_cost==0 || newCost<g_cost){
+		for(int i=0;i<g_stepNumTemp;i++)
+			g_result[i]=g_resultTemp[i];
+		g_cost=newCost;
+		g_stepNum=g_stepNumTemp;
+//	printf("\nreplace:");
+//	for(int i=0;i<g_stepNum;i++)
+//		printf("%hu->",g_result[i]);
+		if(myTime()>=5)g_timeUp=true;
+	}
+}
+
+
+void saveResult(){
+	if(g_found){
+	printf("\n\n");
+	for(int i=0;i<g_stepNum;i++)
+		printf("%hu->",g_result[i]);
+		printf("\n\n");
+		unsigned short path;
+		unsigned short vIndex,nvIndex;
+   		 for (int i = 0; i < g_stepNum-1; i++){
+			vIndex=g_result[i];
+			nvIndex=g_result[i+1];
+			path=pVertex[vIndex]->getEdgeIndex(nvIndex);
+        	record_result(path);
+			printf("%hu|",path);
+		 }
+		printf("\n\n");
+	}
+
+}
 
 bool isOK(){
 	bool result;
 	//是否通过所有要求的点
 	for(int i=0;i<FPnum;i++){
 		result=false;
-		for(int j=0;j<g_stepNum;j++){
+		for(int j=0;j<g_stepNumTemp;j++){
 			if(forcePoint[i]==g_resultTemp[j]){
 				result=true;
 			}
@@ -60,35 +99,32 @@ bool isOK(){
 
 //递归调用
 bool depth_visit(GraphVertex *v,unsigned short tail){
-	g_resultTemp[g_stepNum++]=v->index;	
+	g_resultTemp[g_stepNumTemp++]=v->index;	
 	//v->print();
 	if(v->index==tail){
-	//	printf("\n stack:%hu members-->",g_stepNum);
-	//	for(int i=0;i<g_stepNum;i++)
-	//		printf("%hu-->",g_resultTemp[i]);
-	//	printf("\n ");
+	//	printf("now time:%u  ",myTime());
+		
 		if(isOK()){
 			g_found=true;
+			compareResult();
+			g_stepNumTemp--;
 			return true;
 		}
 		else{
-			g_stepNum--;
-	//		printf("get back\n");
+			g_stepNumTemp--;
 			return false;
 		}
-
 	}
 	v->color=1;
 	for(int i=0;v->edges[i].nextVertex!=NULL;i++){
-		if(g_found)return true;
+		if(g_timeUp)return true;
 		if(v->edges[i].nextVertex->color==0)
 			depth_visit(v->edges[i].nextVertex,tail);
 		
 	}
-	//printf("bk ");
 	v->color=0;
-	if(!g_found)
-		g_stepNum--;
+//	if(!g_found)
+		g_stepNumTemp--;
 }
 
 //从topo中提取数据，建立图
